@@ -1,0 +1,68 @@
+[Service]
+  Port = 50000
+  Timeout = 5000
+  ConnectRetries = 10
+  Labels = [ 'MQTT_Protocol' ,'MODBUS_Protocol' ]
+  StartupMsg = 'mqtt modbus device service started'
+  CheckInterval = '10s'
+  port = [ 8080, 8181, 8282 ]
+
+[Clients]
+  [Clients.Data]
+    Host = 'localhost'
+    Port = 48080
+
+  [Clients.Metadata]
+    Host = 'localhost'
+    Port = 48081
+
+[Device]
+  DataTransform = false
+  Discovery = false
+  MaxCmdOps = 128
+  MaxCmdResultLen = 256
+
+[Logging]
+  LogLevel = 'DEBUG'
+
+[[DeviceList]]
+  Name = 'modbus-01_hangzhou-temperature_device-1'
+  Profile = 'modbus_temperature_device_profile_common'
+  Description = 'An temperature device'
+  [DeviceList.Protocols]
+    [DeviceList.Protocols.modbus-rtu]
+      Address = '/tmp/slave'
+      BaudRate = 9600
+      DataBits = 8
+      StopBits = 1
+      Parity = 'N'
+      UnitID = 1
+  [[DeviceList.AutoEvents]]
+    Resource = 'temperature'
+    OnChange = false
+    Frequency = '10s'
+  [[DeviceList.AutoEvents]]
+    Resource = 'humidity'
+    OnChange = true
+    Frequency = '15000ms'
+
+[[DeviceList]]
+  Name = 'modbus-01_hangzhou-temperature_device-2'
+  Profile = 'modbus_temperature_device_profile_common'
+  Description = 'An temperature device'
+  [DeviceList.Protocols]
+    [DeviceList.Protocols.modbus-rtu]
+      Address = '/tmp/slave'
+      BaudRate = 9600
+      DataBits = 8
+      StopBits = 1
+      Parity = 'N'
+      UnitID = 2
+  [[DeviceList.AutoEvents]]
+    Resource = 'temperature'
+    OnChange = false
+    Frequency = '10s'
+  [[DeviceList.AutoEvents]]
+    Resource = 'humidity'
+    OnChange = true
+    Frequency = '15000ms'

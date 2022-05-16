@@ -1,0 +1,40 @@
+[[ROOT]]
+   index = 0
+   direct  = HORIZONTAL
+
+   [[ROOT.CHILD]]
+      direct  = VERTICAL
+
+      [[ROOT.CHILD.ROOT]]
+         direct  = VIEW
+	 cmd     = /home/gusa1120
+	 exe     = /bin/bash
+
+      [[ROOT.CHILD.CHILD]]
+         direct  = VIEW
+	 cmd     = /home/gusa1120
+	 exe     = /bin/bash
+
+   [[ROOT.CHILD]]
+      direct  = VERTICAL
+
+      [[ROOT.CHILD.CHILD]]
+         direct  = HORIZONTAL
+
+         [[ROOT.CHILD.CHILD.CHILD]]
+            direct  = VIEW
+   	    cmd     = /home/gusa1120
+   	    exe     = /bin/bash
+
+         [[ROOT.CHILD.CHILD.CHILD]]
+            direct  = VIEW
+   	    cmd     = /home/gusa1120
+   	    exe     = /bin/bash
+
+      [[ROOT.CHILD.CHILD]]
+         direct  = VIEW
+	 cmd     = /home/gusa1120
+	 exe     = /bin/bash
+
+
+

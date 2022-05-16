@@ -1,0 +1,2 @@
+ 2033  gcc toml.c test.c -o test
+ 2034  ./test sample.toml 

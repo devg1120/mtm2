@@ -1,0 +1,222 @@
+// tree.c
+//
+//
+
+#include <stdlib.h>
+#include <string.h>
+
+typedef struct node{
+    int value;
+    struct node* pLeftNode;
+    struct node* pRightNode;
+}node_t;
+
+typedef struct tree{
+    node_t* pRootNode;
+}tree_t;
+
+void printfNode(node_t* pNode){
+    if(pNode == NULL){
+        printf("No node\n");
+        return;
+    }
+    
+    printf("%d\n", pNode->value);
+    printf("Left  ");
+    printfNode(pNode->pLeftNode);
+    printf("Right ");
+    printfNode(pNode->pRightNode);
+    
+    return;
+}
+
+void printfTree(tree_t* pTree){
+    if(pTree == NULL){
+        printf("arg chk error");
+        return;
+    }
+    printf("Root  ");
+    printfNode(pTree->pRootNode);
+    printf("\n");
+    
+    return;
+}
+
+tree_t* initTree(){
+    tree_t* pTree = NULL;
+    
+    pTree = (tree_t*)malloc(sizeof(tree_t));
+    if(pTree == NULL){
+        printf("malloc error\n");
+        return NULL;
+    }
+    pTree->pRootNode = NULL;
+    
+    return pTree;
+}
+
+node_t* initNode(int value){
+    node_t* pNode = NULL;
+    
+    pNode = (node_t*)malloc(sizeof(node_t));
+    if(pNode == NULL){
+        printf("malloc error\n");
+        return NULL;
+    }
+    pNode->value = value;
+    pNode->pLeftNode = NULL;
+    pNode->pRightNode = NULL;
+    
+    return pNode;
+}
+
+node_t* insertNode(node_t* pNode, int value){
+        
+    if(pNode == NULL){
+        return initNode(value);
+    }
+    
+    if(value == pNode->value){
+        printf("already registered\n");
+    }else if(value < pNode->value){
+        pNode->pLeftNode = insertNode(pNode->pLeftNode, value);
+    }else{
+        pNode->pRightNode = insertNode(pNode->pRightNode, value);
+    }
+    
+    return pNode; 
+}
+
+int insertNodeInTree(tree_t* pTree, int value){
+    node_t* pNode = NULL;
+    
+    if(pTree == NULL){
+        printf("arg chk error");
+        return -1;
+    }
+    
+    pTree->pRootNode = insertNode(pTree->pRootNode, value);
+    printfTree(pTree);
+    
+    return 0;
+}
+
+void freeNode(node_t* pNode){
+    if(pNode == NULL){
+        return;
+    }
+    freeNode(pNode->pLeftNode);
+    freeNode(pNode->pRightNode);
+    free(pNode);
+    
+    return;
+}
+
+int freeNodeInTree(tree_t* pTree){
+    if(pTree == NULL){
+        printf("arg chk error");
+        return -1;
+    }
+    freeNode(pTree->pRootNode);
+    pTree->pRootNode = NULL;
+    printfTree(pTree);
+    
+    return 0;
+}
+
+int printfMaxAndLevel(tree_t* pTree){
+    node_t* pNode = NULL;
+    int level = 1;
+    
+    if(pTree == NULL){
+        printf("arg chk error");
+        return -1;
+    }
+    if(pTree->pRootNode == NULL){
+        printf("No node\n");
+        return -1;
+    }
+    
+    pNode = pTree->pRootNode;
+    while(pNode->pRightNode != NULL){
+        pNode = pNode->pRightNode;
+        level++;
+    }
+    printf("max=%d level=%d\n", pNode->value, level);
+    
+    return -1;
+}
+
+int printfMinAndLevel(tree_t* pTree){
+    node_t* pNode = NULL;
+    int level = 1;
+    
+    if(pTree == NULL){
+        printf("arg chk error");
+        return -1;
+    }
+    if(pTree->pRootNode == NULL){
+        printf("No node\n");
+        return -1;
+    }
+    
+    pNode = pTree->pRootNode;
+    while(pNode->pLeftNode != NULL){
+        pNode = pNode->pLeftNode;
+        level++;
+    }
+    printf("min=%d level=%d\n", pNode->value, level);
+    
+    return -1;
+}
+
+int findNode(node_t* pNode, int value){
+    if(pNode == NULL){
+        return -1;
+    }
+    
+    if(value == pNode->value){
+        return 0;
+    }else if(value < pNode->value){
+        return findNode(pNode->pLeftNode, value);
+    }else{
+        return findNode(pNode->pRightNode, value);
+    }
+}
+
+int findNodeInTree(tree_t* pTree, int value){
+    if(pTree == NULL){
+        printf("arg chk error");
+        return -1;
+    }
+    if(findNode(pTree->pRootNode, value) == 0){
+        printf("existed\n");
+    }else{
+        printf("Not existed\n");
+    }
+    
+    return 0;
+}
+
+int main(){
+    tree_t* pTree = NULL;    
+    
+    pTree = initTree();
+    
+    insertNodeInTree(pTree, 2);
+    insertNodeInTree(pTree, 3);
+    insertNodeInTree(pTree, 1);
+    insertNodeInTree(pTree, 6);
+    insertNodeInTree(pTree, 5);
+    insertNodeInTree(pTree, 5);
+    
+    printfMinAndLevel(pTree);
+    printfMaxAndLevel(pTree);
+    findNodeInTree(pTree, -1);
+    findNodeInTree(pTree, 6);
+    freeNodeInTree(pTree);
+    
+    return 0;
+}
+
+

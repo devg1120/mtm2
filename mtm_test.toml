@@ -1,0 +1,100 @@
+[[ROOT]]
+   lv = 1
+   index = 0
+   direct  = 'HORIZONTAL'
+
+
+   [[ROOT.CHILD]]
+   lv = 11
+      direct  = 'VERTICAL'
+
+      [[ROOT.CHILD.CHILD]]
+   lv = 111
+         direct  = 'VIEW'
+	 cwd     = '/home/gusa1120/tmp/mtm'
+	 exe     = '/bin/bash'
+
+      [[ROOT.CHILD.CHILD]]
+   lv = 112
+         direct  = 'VIEW'
+	 cwd     = '/use'
+	 exe     = '/bin/bash'
+
+   [[ROOT.CHILD]]
+   lv = 12
+      direct  = 'VERTICAL'
+
+      [[ROOT.CHILD.CHILD]]
+   lv = 121
+         direct  = 'HORIZONTAL'
+
+         [[ROOT.CHILD.CHILD.CHILD]]
+   lv = 1211
+            direct  = 'VIEW'
+   	    cwd     = '/'
+   	    exe     = '/bin/bash'
+
+         [[ROOT.CHILD.CHILD.CHILD]]
+   lv = 1212
+            direct  = 'VIEW'
+   	    cwd     = '/var/log'
+   	    exe     = '/bin/bash'
+
+      [[ROOT.CHILD.CHILD]]
+   lv = 122
+         direct  = 'VIEW'
+	 cwd     = '/home/gusa1120'
+	 exe     = '/usr/local/bin/fish'
+
+
+
+[[ROOT]]
+   lv = 2
+   index = 1
+   direct  = 'HORIZONTAL'
+
+
+   [[ROOT.CHILD]]
+   lv = 21
+      direct  = 'VERTICAL'
+
+      [[ROOT.CHILD.ROOT]]
+   lv = 211
+         direct  = 'VIEW'
+	 cwd     = '/home/gusa1120'
+	 exe     = '/bin/bash'
+
+      [[ROOT.CHILD.CHILD]]
+   lv = 212
+         direct  = 'VIEW'
+	 cwd     = '/home/gusa1120'
+	 exe     = '/bin/bash'
+
+   [[ROOT.CHILD]]
+   lv = 22
+      direct  = 'VERTICAL'
+
+      [[ROOT.CHILD.CHILD]]
+   lv = 221
+         direct  = 'HORIZONTAL'
+
+         [[ROOT.CHILD.CHILD.CHILD]]
+   lv = 2211
+            direct  = 'VIEW'
+   	    cwd     = '/home/gusa1120'
+   	    exe     = '/bin/bash'
+
+         [[ROOT.CHILD.CHILD.CHILD]]
+   lv = 2222
+            direct  = 'VIEW'
+   	    cwd     = '/home/gusa1120'
+   	    exe     = '/bin/bash'
+
+      [[ROOT.CHILD.CHILD]]
+   lv = 222
+         direct  = 'VIEW'
+	 cwd     = '/home/gusa1120'
+	 exe     = '/bin/bash'
+
+
+
