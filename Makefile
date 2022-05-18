@@ -7,7 +7,7 @@ LIBPATH   ?=
 DESTDIR   ?= /usr/local
 MANDIR    ?= $(DESTDIR)/share/man/man1
 CURSESLIB ?= ncursesw
-LIBS      ?= -l$(CURSESLIB) -lutil
+LIBS      ?= -l$(CURSESLIB) -lpanel -lutil
 
 all: mtm
 

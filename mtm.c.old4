@@ -87,6 +87,7 @@ struct NODE{
     Node t;
     int y, x, h, w, pt, ntabs;
     bool *tabs, pnm, decom, am, lnm;
+    bool  isfetch;
     wchar_t repc;
     NODE *p, *c1, *c2;
     SCRN pri, alt, *s;
@@ -99,13 +100,11 @@ struct NODE{
     //char *label_buf ;
     bool  command_shell_loop;
     int pid;
-    bool  isfetch;
     NODE *fetch_save_node;
     NODE **fetch_save_node_cp;
-    int root_index;
-    //bool c1_isfetch;
-    //bool c2_isfetch;
-    //NODE *fetch_parent;
+    bool c1_isfetch;
+    bool c2_isfetch;
+    NODE *fetch_parent;
 };
 
 /*** GLOBALS AND PROTOTYPES */
@@ -792,9 +791,8 @@ newnode(Node t, NODE *p, int y, int x, int h, int w) /* Create a new node. */
     n->expand = false;
     n->command_shell_loop = false;
     n->pid = 0;
-    //n->c1_isfetch = false;
-    //n->c2_isfetch = false;
-    n->root_index = t_root_index;
+    n->c1_isfetch = false;
+    n->c2_isfetch = false;
 
     return n;
 }
@@ -1938,15 +1936,16 @@ fetchnode(NODE *n) /* Fetch a node. */
    	 push_node->fetch_save_node = p->c1;
    	 push_node->fetch_save_node_cp = &(p->c1);
    	 p->c1 = push_node;
-	 //p->c1_isfetch = true;
+	 p->c1_isfetch = true;
    
      } else if (p->c2 == n) {
    	 //save_node = p->c2;
    	 //save_node_cp = &(p->c2);
    	 push_node->fetch_save_node = p->c2;
    	 push_node->fetch_save_node_cp = &(p->c2);
+   	 push_node->fetch_parent = p;
    	 p->c2 = push_node;
-	 //p->c2_isfetch = true;
+	 p->c2_isfetch = true;
    
      }
   } else if (n->type == ROOT) {
@@ -2390,19 +2389,14 @@ window_label(NODE *n)
     //if ( n == focused) c = 3;
     if ( n == t_focused[t_root_index]) c = 3;
 
-    char *push = "push";
     char *fetch = "fetch";
     char *none  = "-";
     char *buf;
 
     buf = (char*)malloc(sizeof(char) * 64);
 
-    if ( n->isfetch ) {
-       if ( is_fetch_window(n) ) {
-           sprintf(buf,"%s  -%s", n->label_buf, fetch);
-       } else {
-           sprintf(buf,"%s  -%s", n->label_buf, push);
-       }
+    if ( is_fetch_window(n) ) {
+	sprintf(buf,"%s  -%s", n->label_buf, fetch);
     } else {
 	sprintf(buf,"%s  -%s", n->label_buf, none);
     }
@@ -2448,14 +2442,8 @@ window_label_old(NODE *n)
 
 static bool
 is_fetch_window(NODE *n) {
-
-   if (t_root_index == n->root_index) {
-         return false;
-   } else {
-         return true;
-   }
   //NODE *p = n->p;
- /*  
+   
   if (n->type == CHILD) {
      //NODE *p = n->p;
      if (n->fetch_parent == NULL) return false;
@@ -2472,7 +2460,7 @@ is_fetch_window(NODE *n) {
   } 
 
   return false;
-*/
+
 }
 
 static void
@@ -2616,7 +2604,6 @@ run(void) /* Run MTM. */
         fixcursor();
         //draw(focused);
         draw(t_focused[t_root_index]);
-        window_label(t_root[t_root_index]);
         doupdate();
 
         status_bar();
