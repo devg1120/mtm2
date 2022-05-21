@@ -43,7 +43,7 @@
 char *lineedit();
 
 int read_symlink(char *filepath, char *buf);
-//int isfullscreen = START_IN_FULLSCREEN;
+int isfullscreen = START_IN_FULLSCREEN;
 
 
 #define MIN(x, y) ((x) < (y)? (x) : (y))
@@ -117,7 +117,6 @@ static bool t_restore_mode = false;
 #define PANE_MAX 10
 static NODE *t_root[PANE_MAX] ;
 static int  t_root_enable[PANE_MAX] ;
-static int  t_isfullscreen[PANE_MAX] ;
 static NODE *t_focused[PANE_MAX] ;
 static NODE *t_lastfocused[PANE_MAX] ;
 
@@ -1360,8 +1359,7 @@ reshapechildren_ups(NODE *n) /* Reshape all children of a view. */
 static void
 reshapechildren(NODE *n) /* Reshape all children of a view. */
 {
-    //if (isfullscreen) {
-    if (t_isfullscreen[t_root_index]) {
+    if (isfullscreen) {
         reshape(n->c1, 0, 0, LINES, COLS);
         reshape(n->c2, 0, 0, LINES, COLS);
     } else {
@@ -1405,9 +1403,8 @@ reshape(NODE *n, int y, int x, int h, int w) /* Reshape a node. */
     n->h = MAX(h, 1);
     n->w = MAX(w, 1);
 
-    //if (isfullscreen) {
-    if (t_isfullscreen[t_root_index]) {
-       n->h = LINES-1;
+    if (isfullscreen) {
+       n->h = LINES;
        n->w = COLS;
     }
 
@@ -1423,8 +1420,7 @@ static void
 drawchildren(const NODE *n) /* Draw all children of n. */
 {
     draw(n->c1);
-    //if(!isfullscreen) {
-    if (!t_isfullscreen[t_root_index]) {
+    if(!isfullscreen) {
         attron(COLOR_PAIR(LINE_PAIR));
         if (n->t == HORIZONTAL)
             mvvline(n->y, n->x + n->w / 2, ACS_VLINE, n->h);
@@ -1442,8 +1438,7 @@ draw(NODE *n) /* Draw a node. */
 {
     if (n->t == VIEW) {
         //if (isfullscreen && n != focused)
-        //if (isfullscreen && n != t_focused[t_root_index])
-        if (t_isfullscreen[t_root_index] && n != t_focused[t_root_index])
+        if (isfullscreen && n != t_focused[t_root_index])
 		            return;
         if (n->isfetch) {
 	    //init_pair(2, COLOR_RED, COLOR_GREEN);
@@ -1480,9 +1475,8 @@ split(NODE *n, Node t,char *cwd, char *exe) /* Split a node. */
     int nh = t == VERTICAL? (n->h - 1) / 2 : n->h;
     int nw = t == HORIZONTAL? (n->w) / 2 : n->w;
 
-    //if (isfullscreen) {
-    if (t_isfullscreen[t_root_index]) {
-	            nh = LINES-1;
+    if (isfullscreen) {
+	            nh = LINES;
 		    nw = COLS;
     }
 
@@ -1559,8 +1553,7 @@ view_fork(NODE *n, Node t)
 
 static void
 togglefullscreen() {
-    //isfullscreen = !isfullscreen;
-    t_isfullscreen[t_root_index] = !t_isfullscreen[t_root_index];
+    isfullscreen = !isfullscreen;
     //reshape(root, 0, 0, LINES, COLS);
     reshape(t_root[t_root_index], 0, 0, LINES-1, COLS);
 }
@@ -2296,38 +2289,6 @@ window_label_clear(NODE *n);
 static void
 draw_label_clear(int x, int y, int color, char *string);
 
-static int
-esc_out_strlen( char *str) 
-{
-   int len = strlen(str);
-   int esc_out_len = 0;
-   bool esc_mode = false;
-   for (int i = 0; i < len; i++)
-   { 
-    LOG_PRINT("%x\n", str[i]);
-	   if (esc_mode == true) {
-	       //if (str[i] == 'm' ) {
-	       if (str[i] == 0x6d ) {
-		       esc_mode = false;
-                       LOG_PRINT("esc end\n" );
-               }
-	   } else {
-	       //if (str[i] == 33) {
-	       if (str[i] == 0x1b) {
-                       LOG_PRINT("esc start\n" );
-		       esc_mode = true;
-	       } else  {
-		       esc_out_len +=1;
-
-	       }
-	   }
-   }
-   return esc_out_len;
-
-}
-
-
-
 static void
 status_bar()
 {
@@ -2348,141 +2309,7 @@ status_bar()
   //const char *cur_pos_restore = "\033[u";
   const char *cur_pos_restore = "\0338";
 
-  const char *fullscreen_status_true  = "\033[41m \033[44m";
-  const char *fullscreen_status_false = " ";
-
-  
-  if (t_isfullscreen[t_root_index]) {
-  sprintf(left_string ,"%s [%d/%d]  %d,%d", fullscreen_status_true, t_root_index, root_num() , t_mouse_x, t_mouse_y);
-  } else {
-  sprintf(left_string ,"%s [%d/%d]  %d,%d", fullscreen_status_false, t_root_index, root_num() , t_mouse_x, t_mouse_y);
-  }
-                                                                       /*
-									*   ---------------> x
-									*   |
-									*   |
-									*    y
-									*/
-
-  int max = root_num();
-
-  for ( int x = 0; x < max ; x++) {
-        if ( x == t_root_index) {
-            pane_led[x] ='T';
-	} else {
-            pane_led[x] ='.';
-	}
-  }
-  pane_led[max] ='\0';
-
-
-  //switch(focused->type){
-  switch(t_focused[t_root_index]->type){
-	  case ROOT:       focused_node_type ="ROOT"; break;
-	  case CHILD:      focused_node_type ="CHILD"; break;
-	  case EXPANDROOT: focused_node_type ="EXPANDROOT"; break;
-	  default:         focused_node_type ="NONE";
-  }
-  char pin_restore_mode = ' ';
-  char pin_mouse_focus  = ' ';
-  char pin_window_label = ' ';
-
-  char * fmt_r_0;
-  char * fmt_w_0;
-  char * fmt_m_0;
-  char * fmt_r_1;
-  char * fmt_w_1;
-  char * fmt_m_1;
-
-  if (t_restore_mode) {
-       pin_restore_mode = 'R';
-       fmt_r_1 = "\033[43m%c\033[44m";
-  } else {
-       pin_restore_mode = '_';
-       fmt_r_0 = "%c";
-  }
-  if (window_label_show) {
-       pin_window_label = 'L';
-       fmt_w_1 = "\033[33m%c\033[34m";
-  } else {
-       pin_window_label = '_';
-       fmt_w_0 = "%c";
-  }
-  if (t_mouse_focus) {
-       pin_mouse_focus = 'M';
-       fmt_m_1 = "\033[43m%c\033[44m";
-  } else {
-       pin_mouse_focus = '_';
-       fmt_m_0 = "%c";
-  }
-
-  sprintf(right_string ,"%s %c%c%c %s", focused_node_type ,pin_restore_mode,
-		                                           pin_mouse_focus,
-							   pin_window_label,
-							   pane_led);
-
-  char string2_fmt[256];
-  sprintf(string2_fmt,"%s %s%s%s %s", "%s", fmt_r_1, fmt_w_1, fmt_m_1, "%s");
-  sprintf(right_string2 ,string2_fmt, focused_node_type ,pin_restore_mode,
-		                                           pin_mouse_focus,
-							   pin_window_label,
-							   pane_led);
-
-  //int left_len   = strlen( left_string);
-  //int right_len  = strlen( right_string2);
-  int left_len   = esc_out_strlen( left_string);
-  int right_len  = esc_out_strlen( right_string2);
-  //LOG_PRINT("len :%d\n", left_len);
-  //LOG_PRINT("esc_out len :%d\n", left_len2);
-
-  // https://www.mm2d.net/main/prog/c/console-02.html
-  
-  sprintf(cur_set ,"\033[%d;%dH", LINES, 0 );
-  
-  sprintf(format  ,"%s%d%s%d%s","\033[30m\033[44m%-", left_len, "s%", COLS - left_len ,"s\033[0m");
-  sprintf(format_expandroot  ,"%s%d%s%d%s","\033[30m\033[43m%-", left_len, "s%", COLS - left_len ,"s\033[0m");
-
-
-  if (t_root[t_root_index]->type == EXPANDROOT) {
-     sprintf(status  ,format_expandroot, left_string, right_string);
-  } else {
-     sprintf(status  ,format, left_string, right_string2);
-  }
-
-  int out = 0;
-  safewrite(out, cur_pos_save,    strlen(cur_pos_save));
-  safewrite(out, cur_set,         strlen(cur_set));
-  safewrite(out, status,      strlen(status));
-  safewrite(out, cur_pos_restore, strlen(cur_pos_restore));
-
-  if (window_label_show) {
-     window_label(t_root[t_root_index]);
-  }
-
-}
-
-static void
-status_bar_old()
-{
-  char cur_set[256];
-  char format[256];
-  char format_expandroot[256];
-  char status[256];
-  char left_string[256];
-  char right_string[256];
-  char right_string2[256];
-  char pane_led[256];
-  char *focused_node_type;
-
-   //const char *cur_pos_save    = "\033[s";
-  const char *cur_pos_save    = "\0337";
-  //const char *cur_top_left    = "\033[0;0H";
-  const char *clear_line      = "\033[2K";
-  //const char *cur_pos_restore = "\033[u";
-  const char *cur_pos_restore = "\0338";
-
-
-  
+  //const char *left_string  = "LEFT TEST";
   sprintf(left_string ,"LEFT_ [%d/%d]  %d,%d", t_root_index, root_num() , t_mouse_x, t_mouse_y);
                                                                        /*
 									*   ---------------> x
@@ -2510,6 +2337,20 @@ status_bar_old()
 	  case EXPANDROOT: focused_node_type ="EXPANDROOT"; break;
 	  default:         focused_node_type ="NONE";
   }
+  //const char *right_string = "RIGHT TEST";
+/*
+  if (window_label_show) {
+     sprintf(right_string ,"%s * %s", focused_node_type , pane_led);
+  } else {
+     sprintf(right_string ,"%s   %s", focused_node_type , pane_led);
+  }
+*/
+  /*
+  char *t_mouse_focus_true      = "M";
+  char *t_mouse_focus_false     = "-";
+  char *window_label_show_true  = "L"
+  char *window_label_show_false = "-"
+*/
   char pin_restore_mode = ' ';
   char pin_mouse_focus  = ' ';
   char pin_window_label = ' ';
@@ -2530,7 +2371,7 @@ status_bar_old()
   }
   if (window_label_show) {
        pin_window_label = 'L';
-       fmt_w_1 = "\033[33m%c\033[34m";
+       fmt_w_1 = "\033[43m%c\033[44m";
   } else {
        pin_window_label = '_';
        fmt_w_0 = "%c";
@@ -2549,7 +2390,9 @@ status_bar_old()
 							   pane_led);
 
   char string2_fmt[256];
-  sprintf(string2_fmt,"%s %s%s%s %s", "%s", fmt_r_1, fmt_w_1, fmt_m_1, "%s");
+  sprintf(string2_fmt,"%s %s%s%s %s", "%s", fmt_r_1, fmt_w_0, fmt_m_0, "%s");
+  //sprintf(right_string2 ,"%s \033[43m%c\033[44m%c%c %s", focused_node_type ,pin_restore_mode,
+  //sprintf(right_string2 ,"%s %c%c%c %s", focused_node_type ,pin_restore_mode,
   sprintf(right_string2 ,string2_fmt, focused_node_type ,pin_restore_mode,
 		                                           pin_mouse_focus,
 							   pin_window_label,
@@ -2562,6 +2405,7 @@ status_bar_old()
   sprintf(cur_set ,"\033[%d;%dH", LINES, 0 );
   
   sprintf(format  ,"%s%d%s%d%s","\033[30m\033[44m%-", left_len, "s%", COLS - left_len ,"s\033[0m");
+  //sprintf(format  ,"%s%d%s%d%s","\033[30m\033[44m%-", left_len, "s%", COLS - left_len+right_len ,"s\033[0m");
   sprintf(format_expandroot  ,"%s%d%s%d%s","\033[30m\033[43m%-", left_len, "s%", COLS - left_len ,"s\033[0m");
 
 
@@ -2574,6 +2418,7 @@ status_bar_old()
   int out = 0;
   safewrite(out, cur_pos_save,    strlen(cur_pos_save));
   safewrite(out, cur_set,         strlen(cur_set));
+  //safewrite(out, clear_line,      strlen(clear_line));
   safewrite(out, status,      strlen(status));
   safewrite(out, cur_pos_restore, strlen(cur_pos_restore));
 
@@ -3233,7 +3078,6 @@ main(int argc, char **argv)
 		   }
                    t_root[t_root_index]->type = ROOT;
                    t_root_enable[t_root_index] = 1;
-                   t_isfullscreen[t_root_index] = START_IN_FULLSCREEN;
 
                    focus(t_root[t_root_index]);
                    draw(t_root[t_root_index]);
