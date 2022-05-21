@@ -1403,6 +1403,11 @@ reshape(NODE *n, int y, int x, int h, int w) /* Reshape a node. */
     n->h = MAX(h, 1);
     n->w = MAX(w, 1);
 
+    if (isfullscreen) {
+       n->h = LINES;
+       n->w = COLS;
+    }
+
     if (n->t == VIEW)
         reshapeview(n, d, ow);
     else
@@ -1415,14 +1420,16 @@ static void
 drawchildren(const NODE *n) /* Draw all children of n. */
 {
     draw(n->c1);
-    attron(COLOR_PAIR(LINE_PAIR));
-    if (n->t == HORIZONTAL)
-        mvvline(n->y, n->x + n->w / 2, ACS_VLINE, n->h);
-    else
-        mvhline(n->y + n->h / 2, n->x, ACS_HLINE, n->w);
-
-    attroff(COLOR_PAIR(LINE_PAIR));
-    wnoutrefresh(stdscr);
+    if(!isfullscreen) {
+        attron(COLOR_PAIR(LINE_PAIR));
+        if (n->t == HORIZONTAL)
+            mvvline(n->y, n->x + n->w / 2, ACS_VLINE, n->h);
+        else
+            mvhline(n->y + n->h / 2, n->x, ACS_HLINE, n->w);
+    
+        attroff(COLOR_PAIR(LINE_PAIR));
+        wnoutrefresh(stdscr);
+    }
     draw(n->c2);
 }
 
@@ -1430,6 +1437,9 @@ static void
 draw(NODE *n) /* Draw a node. */
 {
     if (n->t == VIEW) {
+        //if (isfullscreen && n != focused)
+        if (isfullscreen && n != t_focused[t_root_index])
+		            return;
         if (n->isfetch) {
 	    //init_pair(2, COLOR_RED, COLOR_GREEN);
             //PANEL *panel = new_panel(n->s->win);
@@ -1464,6 +1474,15 @@ split(NODE *n, Node t,char *cwd, char *exe) /* Split a node. */
     n->type = CHILD;
     int nh = t == VERTICAL? (n->h - 1) / 2 : n->h;
     int nw = t == HORIZONTAL? (n->w) / 2 : n->w;
+
+    if (isfullscreen) {
+	            nh = LINES;
+		    nw = COLS;
+    }
+
+
+
+
     NODE *p = n->p;
 /*
     NODE *v ;
@@ -1529,6 +1548,15 @@ view_fork(NODE *n, Node t)
     draw(p? p : t_root[t_root_index]);
 }
 */
+
+
+
+static void
+togglefullscreen() {
+    isfullscreen = !isfullscreen;
+    //reshape(root, 0, 0, LINES, COLS);
+    reshape(t_root[t_root_index], 0, 0, LINES-1, COLS);
+}
 
 static bool
 getinput(NODE *n, fd_set *f) /* Recursively check all ptty's for input. */
@@ -2153,6 +2181,7 @@ handlechar(int r, int k) /* Handle a single input character. */
 //    DO(true,  HFORK,               view_fork(n, HORIZONTAL))
 //    DO(true,  VFORK,               view_fork(n, VERTICAL))
     DO(true,  DUMP_TREE,         dump_tree())
+    DO(true,  FULLSCREEN,          togglefullscreen())
     DO(true,  DELETE_NODE,         deletenode(n))
     DO(true,  SWAP_NODE,         swapnode(n))
     DO(true,  FETCH_NODE,         fetchnode(n))
