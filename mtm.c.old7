@@ -2329,7 +2329,7 @@ esc_out_strlen( char *str)
 
 
 static void
-status_bar_new()
+status_bar()
 {
   char cur_set[256];
   char format[256];
@@ -2462,7 +2462,7 @@ status_bar_new()
 }
 
 static void
-status_bar()
+status_bar_old()
 {
   char cur_set[256];
   char format[256];
@@ -2483,8 +2483,7 @@ status_bar()
 
 
   
-  //sprintf(left_string ,"LEFT_ [%d/%d]  %d,%d", t_root_index, root_num() , t_mouse_x, t_mouse_y);
-  sprintf(left_string ,"[%d/%d]  %d,%d", t_root_index, root_num() , t_mouse_x, t_mouse_y);
+  sprintf(left_string ,"LEFT_ [%d/%d]  %d,%d", t_root_index, root_num() , t_mouse_x, t_mouse_y);
                                                                        /*
 									*   ---------------> x
 									*   |
@@ -2512,7 +2511,6 @@ status_bar()
 	  default:         focused_node_type ="NONE";
   }
   char pin_restore_mode = ' ';
-  char pin_full_screen  = ' ';
   char pin_mouse_focus  = ' ';
   char pin_window_label = ' ';
 
@@ -2527,37 +2525,25 @@ status_bar()
        pin_restore_mode = 'R';
        fmt_r_1 = "\033[43m%c\033[44m";
   } else {
-       pin_restore_mode = ' ';
+       pin_restore_mode = '_';
        fmt_r_0 = "%c";
   }
-
-  if (t_isfullscreen[t_root_index]) {
-       pin_full_screen = 'F';
-       //fmt_r_1 = "\033[43m%c\033[44m";
-  } else {
-       pin_full_screen = ' ';
-       //fmt_r_0 = "%c";
-  }
-
   if (window_label_show) {
        pin_window_label = 'L';
        fmt_w_1 = "\033[33m%c\033[34m";
   } else {
-       pin_window_label = ' ';
+       pin_window_label = '_';
        fmt_w_0 = "%c";
   }
-
   if (t_mouse_focus) {
        pin_mouse_focus = 'M';
        fmt_m_1 = "\033[43m%c\033[44m";
   } else {
-       pin_mouse_focus = ' ';
+       pin_mouse_focus = '_';
        fmt_m_0 = "%c";
   }
 
-  //sprintf(right_string ,"%s %c%c%c%c %s", focused_node_type ,pin_restore_mode,
-  sprintf(right_string ,"%s \033[33m%c%c%c%c\033[34m %s", focused_node_type ,pin_restore_mode,
-		                                           pin_full_screen,
+  sprintf(right_string ,"%s %c%c%c %s", focused_node_type ,pin_restore_mode,
 		                                           pin_mouse_focus,
 							   pin_window_label,
 							   pane_led);
@@ -2575,8 +2561,7 @@ status_bar()
   
   sprintf(cur_set ,"\033[%d;%dH", LINES, 0 );
   
-  //                                                                                    10= \033[33m (5x2)
-  sprintf(format  ,"%s%d%s%d%s","\033[30m\033[44m%-", left_len, "s%", COLS - left_len + 10,"s\033[0m");
+  sprintf(format  ,"%s%d%s%d%s","\033[30m\033[44m%-", left_len, "s%", COLS - left_len ,"s\033[0m");
   sprintf(format_expandroot  ,"%s%d%s%d%s","\033[30m\033[43m%-", left_len, "s%", COLS - left_len ,"s\033[0m");
 
 
