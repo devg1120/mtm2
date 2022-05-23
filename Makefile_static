@@ -7,12 +7,12 @@ DESTDIR   ?= /usr/local
 MANDIR    ?= $(DESTDIR)/share/man/man1
 #CURSESLIB ?= ncursesw
 #LIBS      ?= -l$(CURSESLIB) -lutil 
-LIBS      ?= -l:libncursesw.a -l:libtinfo.a -lutil
+LIBS      ?= -l:libncursesw.a -l:libtinfo.a -lpanel  -lutil 
 
 all: mtms
 
-mtms: vtparser.c mtm.c pair.c config.h rawline.c lineedit.c
-	$(CC) $(CFLAGS) $(FEATURES) -static -o $@ $(HEADERS) vtparser.c mtm.c pair.c rawline.c lineedit.c $(LIBPATH) $(LIBS)
+mtms: vtparser.c mtm.c pair.c config.h rawline.c lineedit.c log.c 
+	$(CC) $(CFLAGS) $(FEATURES) -static -o $@ $(HEADERS) vtparser.c mtm.c pair.c rawline.c lineedit.c readlink.c toml.c log.c $(LIBPATH) $(LIBS)
 	strip mtms
 
 config.h: config.def.h
